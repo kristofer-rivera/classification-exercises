@@ -3,3 +3,4 @@ ipynb_checkponts/
 .DS-Store
 --pycache--/
 *.csv
+*.xlsx
