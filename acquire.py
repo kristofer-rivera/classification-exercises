@@ -39,7 +39,7 @@ def get_telco_data(use_cache=True):
     filename = 'telco.csv'
 
     if os.path.isfile(filename) and use_cache:
-        print('Using chaced csv...')
+        print('Using cached csv...')
         return pd.read_csv(filename)
     else:
         print('Retrieving data from mySQL server...')
