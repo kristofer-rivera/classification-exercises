@@ -25,23 +25,40 @@ def prep_titanic(titanic):
 
 # 3. Prep Telco Data
 
+# Extra step: Create function that splits the data
+
+def split_telco_data(telco):
+    train_validate, test = train_test_split(telco, test_size=.2,
+                                       random_state=123,
+                                       stratify=telco.churn)
+    train, validate = train_test_split(train_validate, test_size=.3,
+                                  random_state=123,
+                                  stratify=train_validate.churn)
+    return train, validate, test
+
+
 def prep_telco(telco):
     telco.drop_duplicates(inplace = True)
     telco['total_charges'] = telco['total_charges'].str.strip()
-    telco['total_charges'] = pd.to_numeric(telco.total_charges, errors='coerce')
+    telco = telco[telco.total_charges != '']
+    telco['total_charges'] = telco.total_charges.astype(float)
     columns_to_drop = ['customer_id', 'streaming_tv', 'streaming_movies', 'online_security', 'online_backup', 
                        'device_protection', 'tech_support', 'contract_type_id', 'payment_type_id', 
                        'internet_service_type_id']
     telco = telco.drop(columns = columns_to_drop)
-    telco['partner'] = telco.partner.map(dict(Yes=1, No=0))
-    telco['dependents'] = telco.dependents.map(dict(Yes=1, No=0))
-    telco['phone_service'] = telco.phone_service.map(dict(Yes=1, No=0))
-    telco['multiple_lines'] = telco.multiple_lines.map(dict(Yes=1, No=0))
-    telco['paperless_billing'] = telco.paperless_billing.map(dict(Yes=1, No=0))
-    telco['churn'] = telco.churn.map(dict(Yes=1, No=0))
+    telco['partner'] = telco.partner.map({'Yes': 1, 'No': 0})
+    telco['dependents'] = telco.dependents.map({'Yes': 1, 'No': 0})
+    telco['phone_service'] = telco.phone_service.map({'Yes': 1, 'No': 0})
+    telco['paperless_billing'] = telco.paperless_billing.map({'Yes': 1, 'No': 0})
+    telco['churn'] = telco.churn.map({'Yes': 1, 'No': 0})
     dummy_telco = pd.get_dummies(telco[['gender','contract_type', 'payment_type', 'internet_service_type']], 
                          dummy_na = False, 
                          drop_first = [True, True])
     telco = pd.concat([telco, dummy_telco], axis = 1)
-    return telco.drop(columns= ['gender', 'contract_type', 'payment_type', 'internet_service_type'])
+    telco = telco.drop(columns= ['gender', 'contract_type', 'payment_type', 'internet_service_type'])
+    
+    #Split the data using other function
+    train, validate, test = split_telco_data(telco)
+    
+    return train, validate, test
 
